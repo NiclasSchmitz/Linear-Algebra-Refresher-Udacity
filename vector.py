@@ -118,11 +118,12 @@ class Vector(object):
         try:
             u1 = self.normalized()
             u2 = v.normalized()
-            angle_in_radians = acos(u1.dot(u2))
+            dot_product = round(u1.dot(u2), 3)
+            angle_in_radians = acos(dot_product)
 
             if in_degrees:
-                degrees_per_radian = 180. / pi
-                return Decimal(angle_in_radians * degrees_per_radian)
+                degrees_per_radian = 180./pi
+                return Decimal(angle_in_radians*degrees_per_radian)
             else:
                 return Decimal(angle_in_radians)
 
