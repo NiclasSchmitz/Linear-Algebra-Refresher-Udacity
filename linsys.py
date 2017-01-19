@@ -47,8 +47,8 @@ class LinearSystem(object):
         return ret
 
     def indices_of_first_nonzero_terms_in_each_row(self):
+        '''calculate pivot variable indices'''
         num_equations = len(self)
-        # num_variables = self.dimension
 
         indices = [-1] * num_equations
 
@@ -60,7 +60,6 @@ class LinearSystem(object):
                     continue
                 else:
                     raise e
-
         return indices
 
     def swap_rows(self, row1, row2):
@@ -97,7 +96,7 @@ class LinearSystem(object):
         system = deepcopy(self)
         num_equations = len(system)
         num_variables = system.dimension
-        j = 0
+        j = 0  # current variable
         for i in range(num_equations):
             while j < num_variables:
                 c = MyDecimal(system[i][j])
@@ -131,6 +130,33 @@ class LinearSystem(object):
             n = self[k].normal_vector
             gamma = n[col]
             alpha = -gamma/beta
+            self.add_multiple_times_row_to_row(alpha, row, k)
+
+    def compute_rref(self):
+        '''reduced row echelon form'''
+        tf = self.compute_triangular_form()
+
+        num_equations = len(tf)
+        pivot_indices = tf.indices_of_first_nonzero_terms_in_each_row()
+
+        for i in range(num_equations)[::-1]:
+            j = pivot_indices[i]
+            if j < 0:
+                continue
+            tf.scale_row_to_make_coefficient_equal_one(i, j)
+            tf.clear_coefficients_above(i, j)
+        return tf
+
+    def scale_row_to_make_coefficient_equal_one(self, row, col):
+        n = self[row].normal_vector
+        beta = Decimal('1.0')/n[col]
+        self.multiply_coefficient_and_row(beta, row)
+
+    def clear_coefficients_above(self, row, col):
+        '''all coefficients in column col above this row are getting cleared'''
+        for k in range(row)[::-1]:
+            n = self[k].normal_vector
+            alpha = -(n[col])
             self.add_multiple_times_row_to_row(alpha, row, k)
 
 
@@ -257,4 +283,48 @@ if __name__ == '__main__':
     if not (t[0] == Plane(Vector(['1', '-1', '1']), '2') and
             t[1] == Plane(Vector(['0', '1', '1']), '1') and
             t[2] == Plane(Vector(['0', '0', '-9']), '-2')):
+        print('test case 4 failed')
+
+    print('#################')
+    print('Quiz: Coding RREF')
+
+    p1 = Plane(Vector(['1', '1', '1']), '1')
+    p2 = Plane(Vector(['0', '1', '1']), '2')
+    s = LinearSystem([p1, p2])
+    r = s.compute_rref()
+    if not (r[0] == Plane(Vector(['1', '0', '0']), '-1') and
+            r[1] == p2):
+        print('test case 1 failed')
+
+    p1 = Plane(Vector(['1', '1', '1']), '1')
+    p2 = Plane(Vector(['1', '1', '1']), '2')
+    s = LinearSystem([p1, p2])
+    r = s.compute_rref()
+    if not (r[0] == p1 and
+            r[1] == Plane(constant_term='1')):
+        print('test case 2 failed')
+
+    p1 = Plane(Vector(['1', '1', '1']), '1')
+    p2 = Plane(Vector(['0', '1', '0']), '2')
+    p3 = Plane(Vector(['1', '1', '-1']), '3')
+    p4 = Plane(Vector(['1', '0', '-2']), '2')
+    s = LinearSystem([p1, p2, p3, p4])
+    r = s.compute_rref()
+    if not (r[0] == Plane(Vector(['1', '0', '0']), '0') and
+            r[1] == p2 and
+            r[2] == Plane(Vector(['0', '0', '-2']), '2') and
+            r[3] == Plane()):
+        print('test case 3 failed')
+
+    p1 = Plane(Vector(['0', '1', '1']), '1')
+    p2 = Plane(Vector(['1', '-1', '1']), '2')
+    p3 = Plane(Vector(['1', '2', '-5']), '3')
+    s = LinearSystem([p1, p2, p3])
+    r = s.compute_rref()
+    if not (r[0] == Plane(Vector(['1', '0', '0']),
+            Decimal('23')/Decimal('9')) and
+            r[1] == Plane(Vector(['0', '1', '0']),
+            Decimal('7')/Decimal('9')) and
+            r[2] == Plane(Vector(['0', '0', '1']),
+            Decimal('2')/Decimal('9'))):
         print('test case 4 failed')
