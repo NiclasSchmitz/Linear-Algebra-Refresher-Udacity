@@ -1,5 +1,5 @@
 from decimal import Decimal, getcontext
-# from copy import deepcopy
+from copy import deepcopy
 
 from vector import Vector
 from plane import Plane
@@ -8,7 +8,6 @@ getcontext().prec = 30
 
 
 class LinearSystem(object):
-    '''Linear System'''
 
     PLANES_SAME_DIM_MSG = 'Planes in the system should live in the same dim.'
     NO_SOLUTIONS_MSG = 'No solutions'
@@ -76,17 +75,63 @@ class LinearSystem(object):
         new_constant_term = k*coefficient
         self[row] = Plane(new_normal_vector, new_constant_term)
 
-    def add_multiple_times_row_to_row(self, coefficient, to_add, be_added_to):
-        '''add multiple times row to row'''
-        n1 = self[to_add].normal_vector
-        n2 = self[be_added_to].normal_vector
-        k1 = self[to_add].constant_term
-        k2 = self[be_added_to].constant_term
+    def add_multiple_times_row_to_row(self, coefficient, from_here, to_here):
+        '''add multiple times from_here row to_here row'''
+        n1 = self[from_here].normal_vector
+        n2 = self[to_here].normal_vector
+        k1 = self[from_here].constant_term
+        k2 = self[to_here].constant_term
 
         new_normal_vector = n1.times_scalar(coefficient).plus(n2)
         new_constant_term = (k1*coefficient) + k2
+        self[to_here] = Plane(new_normal_vector, new_constant_term)
 
-        self[be_added_to] = Plane(new_normal_vector, new_constant_term)
+    def compute_triangular_form(self):
+        '''form linear equations into echelon form
+
+        Assumptions for Test Cases:
+        1. Swap with topmost row below current row
+        2. Don't multiply rows by numbers
+        3. Only add a multiple of a row to rows underneath
+        '''
+        system = deepcopy(self)
+        num_equations = len(system)
+        num_variables = system.dimension
+        j = 0
+        for i in range(num_equations):
+            while j < num_variables:
+                c = MyDecimal(system[i][j])
+                if c.is_near_zero():
+                    swap_succeeded = system.swap_with_row_below(i, j)
+                    if not swap_succeeded:
+                        j += 1
+                        continue
+                system.clear_coefficients_below(i, j)
+                j += 1
+                break
+        return system
+
+    def swap_with_row_below(self, row, col):
+        '''find row with a value of != 0 in column col and swap'''
+        num_equations = len(self)
+
+        for k in range(row+1, num_equations):
+            coefficient = MyDecimal(self[k][col])
+            if not coefficient.is_near_zero():
+                self.swap_rows(row, k)
+                return True
+        return False
+
+    def clear_coefficients_below(self, row, col):
+        '''all coefficients in column col below this row are getting cleared'''
+        num_equations = len(self)
+        beta = MyDecimal(self[row][col])
+
+        for k in range(row+1, num_equations):
+            n = self[k].normal_vector
+            gamma = n[col]
+            alpha = -gamma/beta
+            self.add_multiple_times_row_to_row(alpha, row, k)
 
 
 class MyDecimal(Decimal):
@@ -112,6 +157,9 @@ if __name__ == '__main__':
     # print(MyDecimal('1e-9').is_near_zero())
     # print(MyDecimal('1e-11').is_near_zero())
 
+    print('###########################')
+    print('Quiz: Coding Row Operations')
+
     p0 = Plane(Vector(['1', '1', '1']), '1')
     p1 = Plane(Vector(['0', '1', '0']), '2')
     p2 = Plane(Vector(['1', '1', '-1']), '3')
@@ -120,7 +168,6 @@ if __name__ == '__main__':
     s = LinearSystem([p0, p1, p2, p3])
 
     s.swap_rows(0, 1)
-
     if not (s[0] == p1 and s[1] == p0 and s[2] == p2 and s[3] == p3):
         print('test case 1 failed')
 
@@ -170,3 +217,44 @@ if __name__ == '__main__':
             s[2] == Plane(Vector(['-1', '-1', '1']), '-3') and
             s[3] == p3):
         print('test case 9 failed')
+
+    print('############################')
+    print('Quiz: Coding Triangular Form')
+
+    p1 = Plane(Vector(['1', '1', '1']), '1')
+    p2 = Plane(Vector(['0', '1', '1']), '2')
+    s = LinearSystem([p1, p2])
+    t = s.compute_triangular_form()
+    if not (t[0] == p1 and
+            t[1] == p2):
+        print('test case 1 failed')
+
+    p1 = Plane(Vector(['1', '1', '1']), '1')
+    p2 = Plane(Vector(['1', '1', '1']), '2')
+    s = LinearSystem([p1, p2])
+    t = s.compute_triangular_form()
+    if not (t[0] == p1 and
+            t[1] == Plane(constant_term='1')):
+        print('test case 2 failed')
+
+    p1 = Plane(Vector(['1', '1', '1']), '1')
+    p2 = Plane(Vector(['0', '1', '0']), '2')
+    p3 = Plane(Vector(['1', '1', '-1']), '3')
+    p4 = Plane(Vector(['1', '0', '-2']), '2')
+    s = LinearSystem([p1, p2, p3, p4])
+    t = s.compute_triangular_form()
+    if not (t[0] == p1 and
+            t[1] == p2 and
+            t[2] == Plane(Vector(['0', '0', '-2']), '2') and
+            t[3] == Plane()):
+        print('test case 3 failed')
+
+    p1 = Plane(Vector(['0', '1', '1']), '1')
+    p2 = Plane(Vector(['1', '-1', '1']), '2')
+    p3 = Plane(Vector(['1', '2', '-5']), '3')
+    s = LinearSystem([p1, p2, p3])
+    t = s.compute_triangular_form()
+    if not (t[0] == Plane(Vector(['1', '-1', '1']), '2') and
+            t[1] == Plane(Vector(['0', '1', '1']), '1') and
+            t[2] == Plane(Vector(['0', '0', '-9']), '-2')):
+        print('test case 4 failed')
