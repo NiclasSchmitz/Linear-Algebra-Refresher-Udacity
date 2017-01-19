@@ -12,14 +12,8 @@ class Plane(object):
     def __init__(self, normal_vector=None, constant_term=None):
         '''Create a Plane Object
 
-        consists of a normal vector, constant term and basepoint
         Ax + By + Cz = k
-        Vector([A, B, C]) represents a normal Vector
-
-        Args:
-            normal_vector: Vector Object
-            constant_term:
-        '''
+        Vector([A, B, C]) represents a normal Vector'''
         self.dimension = 3
 
         if not normal_vector:
@@ -33,13 +27,13 @@ class Plane(object):
 
         self.set_basepoint()
 
-    def set_basepoint(self):
-        '''calculate basepoint
+    def __getitem__(self, i):
+        return self.normal_vector[i]
 
-        find the the first non zero coordinate, either (0, k/B) or (k/A, 0)
-        '''
+    def set_basepoint(self):
+        '''find the first non zero coordinate, either (0, k/B) or (k/A, 0)'''
         try:
-            n = self.normal_vector.coords
+            n = self.normal_vector
             c = self.constant_term
             basepoint_coords = ['0']*self.dimension
 
@@ -79,7 +73,7 @@ class Plane(object):
 
             return output
 
-        n = self.normal_vector.coords
+        n = self.normal_vector
 
         try:
             initial_index = Plane.first_nonzero_index(n)
@@ -113,32 +107,55 @@ class Plane(object):
         raise Exception(Plane.NO_NONZERO_ELTS_FOUND_MSG)
 
     def is_parallel_to(self, plane2):
-        '''determine if this plane is parallel to plane2
-
-        two planes are parallel if their normal vectors are parallel
-
-        args:
-            plane2: Plane Object
-        '''
+        '''two planes are parallel if their normal vectors are parallel'''
         return self.normal_vector.is_parallel_to(plane2.normal_vector)
 
     def __eq__(self, plane2):
-        '''determine if this plane is equal to plane2
-
-        two planes are equal, if the vector connecting one point on each plane
-        is orthogonal to the planes normal vectors
-
-        args:
-            plane2: Plane Object
-        '''
+        '''two planes are equal, if the vector connecting one point on each
+        plane is orthogonal to the planes normal vectors'''
         # normal vector have to be parallel in order to be equal
+        # if not self.is_parallel_to(plane2):
+        #     return False
+
+        # v_connect = self.basepoint.minus(plane2.basepoint)
+        # return v_connect.is_orthogonal_to(self.normal_vector)
+        if self.normal_vector.is_zero():
+            if not plane2.normal_vector.is_zero():
+                return False
+
+            diff = self.constant_term - plane2.constant_term
+            return MyDecimal(diff).is_near_zero()
+
+        elif plane2.normal_vector.is_zero():
+            return False
+
         if not self.is_parallel_to(plane2):
             return False
 
-        v_connect = self.basepoint.minus(plane2.basepoint)
-        return v_connect.is_orthogonal_to(self.normal_vector)
+        basepoint_difference = self.basepoint.minus(plane2.basepoint)
+        return basepoint_difference.is_orthogonal_to(self.normal_vector)
 
 
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
         return abs(self) < eps
+
+if __name__ == '__main__':
+
+    print('################################')
+    print('Quiz: Planes in 3 Dimensions - 2')
+
+    p1 = Plane(Vector([-0.412, 3.806, 0.728]), -3.46)
+    p2 = Plane(Vector([1.03, -9.515, -1.82]), 8.65)
+    print('equal: {0}'.format(p1 == p2))
+    print('parallel but unequal: {0}'.format(p1.is_parallel_to(p2)))
+
+    p3 = Plane(Vector([2.611, 5.528, 0.283]), 4.6)
+    p4 = Plane(Vector([7.715, 8.306, 5.342]), 3.76)
+    print('equal: {0}'.format(p3 == p4))
+    print('parallel but unequal: {0}'.format(p3.is_parallel_to(p4)))
+
+    p5 = Plane(Vector([-7.926, 8.625, -7.212]), -7.952)
+    p6 = Plane(Vector([-2.642, 2.875, -2.404]), -2.443)
+    print('equal: {0}'.format(p5 == p6))
+    print('parallel but unequal: {0}'.format(p5.is_parallel_to(p6)))

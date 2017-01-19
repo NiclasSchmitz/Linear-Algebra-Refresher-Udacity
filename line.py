@@ -6,21 +6,11 @@ getcontext().prec = 30
 
 
 class Line(object):
-    '''Vector representation of a Line'''
 
     NO_NONZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
 
     def __init__(self, normal_vector=None, constant_term=None):
-        '''Create a Line Object
-
-        consists of normal vector, constant term and basepoint
-        Ax + By = k
-        Vector([A, B]) represents a normal Vector
-
-        Args:
-            normal_vector: Vector Object
-            constant_term:
-        '''
+        '''Create a Line Object; Ax + By = k'''
         self.dimension = 2
 
         if not normal_vector:
@@ -35,12 +25,10 @@ class Line(object):
         self.set_basepoint()
 
     def set_basepoint(self):
-        '''calculate basepoint
-
-        find the the firstnonzero coordinate, either (0, k/B) or (k/A, 0)
-        '''
+        '''calculate basepoint, find the the firstnonzero coordinate,
+        either (0, k/B) or (k/A, 0)'''
         try:
-            n = self.normal_vector.coords
+            n = self.normal_vector
             c = self.constant_term
             basepoint_coords = ['0']*self.dimension
 
@@ -80,7 +68,7 @@ class Line(object):
 
             return output
 
-        n = self.normal_vector.coords
+        n = self.normal_vector
 
         try:
             initial_index = Line.first_nonzero_index(n)
@@ -91,8 +79,6 @@ class Line(object):
                         n[i],
                         is_initial_term=(i == initial_index))
                         + 'x_{}'.format(i+1))
-            print(terms)
-            print(type(terms))
             output = ' '.join(terms)
 
         except Exception as e:
@@ -116,25 +102,13 @@ class Line(object):
         raise Exception(Line.NO_NONZERO_ELTS_FOUND_MSG)
 
     def is_parallel_to(self, line2):
-        '''determine if this line is parallel to line2
-
-        two lines are parallel if they do not have a unique intersection
-
-        args:
-            line2: Line Object
-        '''
+        '''two lines are parallel if their normal vectors are parallel'''
         return self.normal_vector.is_parallel_to(line2.normal_vector)
 
     def __eq__(self, line2):
-        '''determine if this line is equal to line2
-
-        two lines are equal if and only if the vector connecting one point on
-        each line is orthogonal to the line's normal vectors
-
-        args:
-            line2: Line Object
-        '''
-        # normal vector have to be parallel in order to be equal
+        '''two lines are equal if and only if the vector connecting one point on
+        each line is orthogonall to the line\'s normal vector'''
+        # normal vector's have to be parallel in order to be equal
         if not self.is_parallel_to(line2):
             return False
 
@@ -142,13 +116,9 @@ class Line(object):
         return v_connect.is_orthogonal_to(self.normal_vector)
 
     def intersects_with(self, line2):
-        '''determine intersection point with line2
-
-        args:
-            line2: Line Object
-        '''
-        a, b = self.normal_vector.coords
-        c, d = line2.normal_vector.coords
+        '''determine intersection point with line2'''
+        a, b = self.normal_vector
+        c, d = line2.normal_vector
         k1, k2 = self.constant_term, line2.constant_term
         denom = ((a*d)-(b*c))
         if MyDecimal(denom).is_near_zero():
@@ -166,5 +136,23 @@ class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
         return abs(self) < eps
 
+
 if __name__ == '__main__':
-    pass
+
+    print('################################')
+    print('Quiz: Coding Functions for Lines')
+
+    l1 = Line(Vector([4.046, 2.836]), 1.21)
+    l2 = Line(Vector([10.115, 7.09]), 3.025)
+    print('intersection at: {0}'.format(l1.intersects_with(l2)))
+    print('same line: {0}'.format(l1 == l2))
+
+    l3 = Line(Vector([7.204, 3.182]), 8.68)
+    l4 = Line(Vector([8.172, 4.114]), 9.883)
+    print('intersection at: {0}'.format(l3.intersects_with(l4)))
+    print('same line: {0}'.format(l3 == l4))
+
+    l5 = Line(Vector([1.182, 5.562]), 6.744)
+    l6 = Line(Vector([1.773, 8.343]), 9.525)
+    print('intersection at: {0}'.format(l5.intersects_with(l6)))
+    print('same line: {0}'.format(l5 == l6))
