@@ -159,6 +159,53 @@ class LinearSystem(object):
             alpha = -(n[col])
             self.add_multiple_times_row_to_row(alpha, row, k)
 
+    def compute_solution(self):
+        '''either unique-, no-, or infinitely many solutions'''
+        try:
+            return self.do_gaussian_elminitation_and_extract_solution()
+
+        except Exception as e:
+            if (str(e) == self.NO_SOLUTIONS_MSG or
+                    str(e) == self.INF_SOLUTIONS_MSG):
+                return str(e)
+            else:
+                raise e
+
+    def do_gaussian_elminitation_and_extract_solution(self):
+        '''find unique solution otherwise throw exception'''
+        rref = self.compute_rref()
+
+        rref.raise_exception_if_contracdictory_equation()
+        rref.raise_exception_if_too_few_pivots()
+
+        num_variables = rref.dimension
+        solution_coordinates = [rref.planes[i].constant_term for i in
+                                range(num_variables)]
+        return Vector(solution_coordinates)
+
+    def raise_exception_if_contracdictory_equation(self):
+        '''check if linear system has got no solution'''
+        for p in self.planes:
+            try:
+                p.first_nonzero_index(p.normal_vector)
+
+            except Exception as e:
+                if str(e) == 'No nonzero elements found':
+                    constant_term = MyDecimal(p.constant_term)
+                    if not constant_term.is_near_zero():
+                        raise Exception(self.NO_SOLUTIONS_MSG)
+                else:
+                    raise e
+
+    def raise_exception_if_too_few_pivots(self):
+        '''check if linear system has got infinite many solutions'''
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+        num_pivots = sum([1 if index >= 0 else 0 for index in pivot_indices])
+        num_variables = self.dimension
+
+        if num_pivots < num_variables:
+            raise Exception(self.INF_SOLUTIONS_MSG)
+
 
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
@@ -328,3 +375,27 @@ if __name__ == '__main__':
             r[2] == Plane(Vector(['0', '0', '1']),
             Decimal('2')/Decimal('9'))):
         print('test case 4 failed')
+
+    print('########################')
+    print('Quiz: Coding GE Solution')
+
+    p1 = Plane(Vector([5.862, 1.178, -10.366]), -8.15)
+    p2 = Plane(Vector([-2.931, -0.589, 5.183]), -4.075)
+    s = LinearSystem([p1, p2])
+    solution = s.compute_solution()
+    print(solution)
+
+    p1 = Plane(Vector([8.631, 5.112, -1.816]), -5.113)
+    p2 = Plane(Vector([4.315, 11.132, -5.27]), -6.775)
+    p3 = Plane(Vector([-2.158, 3.01, -1.727]), -0.831)
+    s = LinearSystem([p1, p2, p3])
+    solution = s.compute_solution()
+    print(solution)
+
+    p1 = Plane(Vector([5.262, 2.739, -9.878]), -3.441)
+    p2 = Plane(Vector([5.111, 6.358, 7.638]), -2.152)
+    p3 = Plane(Vector([2.016, -9.924, -1.367]), -9.278)
+    p4 = Plane(Vector([2.167, -13.543, -18.883]), -10.567)
+    s = LinearSystem([p1, p2, p3, p4])
+    solution = s.compute_solution()
+    print(solution)
