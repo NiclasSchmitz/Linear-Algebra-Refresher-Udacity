@@ -1,5 +1,4 @@
 from decimal import Decimal, getcontext
-
 from vector import Vector
 
 getcontext().prec = 30
@@ -14,7 +13,7 @@ class Line(object):
         self.dimension = 2
 
         if not normal_vector:
-            all_zeros = ['0']*self.dimension
+            all_zeros = ['0'] * self.dimension
             normal_vector = Vector(all_zeros)
         self.normal_vector = normal_vector
 
@@ -30,12 +29,12 @@ class Line(object):
         try:
             n = self.normal_vector
             c = self.constant_term
-            basepoint_coords = ['0']*self.dimension
+            basepoint_coords = ['0'] * self.dimension
 
             initial_index = Line.first_nonzero_index(n)
             initial_coefficient = n[initial_index]
 
-            basepoint_coords[initial_index] = c/initial_coefficient
+            basepoint_coords[initial_index] = c / initial_coefficient
             self.basepoint = Vector(basepoint_coords)
 
         except Exception as e:
@@ -77,8 +76,8 @@ class Line(object):
                 if round(n[i], num_decimal_places) != 0:
                     terms.append(write_coefficient(
                         n[i],
-                        is_initial_term=(i == initial_index))
-                        + 'x_{}'.format(i+1))
+                        is_initial_term=(i == initial_index)) +
+                        'x_{}'.format(i + 1))
             output = ' '.join(terms)
 
         except Exception as e:
@@ -120,7 +119,7 @@ class Line(object):
         a, b = self.normal_vector
         c, d = line2.normal_vector
         k1, k2 = self.constant_term, line2.constant_term
-        denom = ((a*d)-(b*c))
+        denom = ((a * d) - (b * c))
         if MyDecimal(denom).is_near_zero():
             if self == line2:
                 return self

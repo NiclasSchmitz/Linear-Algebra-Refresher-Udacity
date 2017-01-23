@@ -39,17 +39,17 @@ class Vector(object):
 
     def plus(self, v):
         '''add a Vector to a Vector'''
-        new_coords = [x+y for x, y in zip(self.coords, v.coords)]
+        new_coords = [x + y for x, y in zip(self.coords, v.coords)]
         return Vector(new_coords)
 
     def minus(self, v):
         '''subtract a vector from a vector'''
-        new_coords = [x-y for x, y in zip(self.coords, v.coords)]
+        new_coords = [x - y for x, y in zip(self.coords, v.coords)]
         return Vector(new_coords)
 
     def times_scalar(self, scalar):
         '''Scalar Multiplication'''
-        new_coords = [Decimal(scalar)*x for x in self.coords]
+        new_coords = [Decimal(scalar) * x for x in self.coords]
         return Vector(new_coords)
 
     def magnitude(self):
@@ -61,13 +61,13 @@ class Vector(object):
         '''calculate vector of magnitude 1, pointing in the same direction'''
         try:
             magnitude = Decimal(self.magnitude())
-            return self.times_scalar(Decimal('1.0')/magnitude)
+            return self.times_scalar(Decimal('1.0') / magnitude)
         except ZeroDivisionError:
             raise Exception(self.CANNOT_NORMALIZE_ZERO_VECTOR_MSG)
 
     def dot(self, v):
         '''calculate Dot-Product (Inner-/Scalar-Product) of two vectors'''
-        return sum([x*y for x, y in zip(self.coords, v.coords)])
+        return sum([x * y for x, y in zip(self.coords, v.coords)])
 
     def angle_with(self, v, in_degrees=False):
         '''calculate angle between two vectors'''
@@ -78,8 +78,8 @@ class Vector(object):
             angle_in_radians = acos(dot_product)
 
             if in_degrees:
-                degrees_per_radian = 180./pi
-                return Decimal(angle_in_radians*degrees_per_radian)
+                degrees_per_radian = 180. / pi
+                return Decimal(angle_in_radians * degrees_per_radian)
             else:
                 return Decimal(angle_in_radians)
 
@@ -131,7 +131,9 @@ class Vector(object):
         try:
             x1, y1, z1 = self.coords
             x2, y2, z2 = v.coords
-            new_coords = [y1*z2-y2*z1, -(x1*z2-x2*z1), x1*y2-x2*y1]
+            new_coords = [y1 * z2 - y2 * z1,
+                          -(x1 * z2 - x2 * z1),
+                          x1 * y2 - x2 * y1]
             return Vector(new_coords)
         except ValueError as e:
             msg = str(e)
@@ -154,6 +156,7 @@ class Vector(object):
     def area_of_triangle_with(self, v):
         '''area of triangle == half magnitude of the Cross-Product'''
         return Decimal('0.5') * self.area_of_parallelogram_with(v)
+
 
 if __name__ == '__main__':
 
