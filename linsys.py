@@ -2,14 +2,14 @@ from decimal import Decimal, getcontext
 from copy import deepcopy
 
 from vector import Vector
-from plane import Plane
+from hyperplane import Hyperplane
 
 getcontext().prec = 30
 
 
 class LinearSystem(object):
 
-    PLANES_SAME_DIM_MSG = 'Planes in the system should live in the same dim.'
+    PLANES_SAME_DIM_MSG = 'Hyperplanes in the system should live in the same dim.'
     NO_SOLUTIONS_MSG = 'No solutions'
     INF_SOLUTIONS_MSG = 'Infinitely many solutions'
 
@@ -56,7 +56,7 @@ class LinearSystem(object):
             try:
                 indices[i] = p.first_nonzero_index(p.normal_vector.coords)
             except Exception as e:
-                if str(e) == Plane.NO_NONZERO_ELTS_FOUND_MSG:
+                if str(e) == Hyperplane.NO_NONZERO_ELTS_FOUND_MSG:
                     continue
                 else:
                     raise e
@@ -72,7 +72,7 @@ class LinearSystem(object):
         k = self[row].constant_term
         new_normal_vector = n.times_scalar(coefficient)
         new_constant_term = k * coefficient
-        self[row] = Plane(new_normal_vector, new_constant_term)
+        self[row] = Hyperplane(normal_vector=new_normal_vector, constant_term=new_constant_term)
 
     def add_multiple_times_row_to_row(self, coefficient, from_here, to_here):
         '''add multiple times from_here row to_here row'''
@@ -83,7 +83,7 @@ class LinearSystem(object):
 
         new_normal_vector = n1.times_scalar(coefficient).plus(n2)
         new_constant_term = (k1 * coefficient) + k2
-        self[to_here] = Plane(new_normal_vector, new_constant_term)
+        self[to_here] = Hyperplane(normal_vector=new_normal_vector, constant_term=new_constant_term)
 
     def compute_triangular_form(self):
         '''form linear equations into echelon form
@@ -291,10 +291,10 @@ class MyDecimal(Decimal):
 
 
 if __name__ == '__main__':
-    # p0 = Plane(Vector(['1', '1', '1']), '1')
-    # p1 = Plane(Vector(['0', '1', '0']), '2')
-    # p2 = Plane(Vector(['1', '1', '-1']), '3')
-    # p3 = Plane(Vector(['1', '0', '-2']), '2')
+    # p0 = Hyperplane(Vector(['1', '1', '1']), '1')
+    # p1 = Hyperplane(Vector(['0', '1', '0']), '2')
+    # p2 = Hyperplane(Vector(['1', '1', '-1']), '3')
+    # p3 = Hyperplane(Vector(['1', '0', '-2']), '2')
 
     # s = LinearSystem([p0, p1, p2, p3])
 
@@ -312,10 +312,10 @@ if __name__ == '__main__':
     print('###########################')
     print('Quiz: Coding Row Operations')
 
-    p0 = Plane(Vector(['1', '1', '1']), '1')
-    p1 = Plane(Vector(['0', '1', '0']), '2')
-    p2 = Plane(Vector(['1', '1', '-1']), '3')
-    p3 = Plane(Vector(['1', '0', '-2']), '2')
+    p0 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p1 = Hyperplane(normal_vector=Vector(['0', '1', '0']), constant_term='2')
+    p2 = Hyperplane(normal_vector=Vector(['1', '1', '-1']), constant_term='3')
+    p3 = Hyperplane(normal_vector=Vector(['1', '0', '-2']), constant_term='2')
 
     s = LinearSystem([p0, p1, p2, p3])
 
@@ -338,143 +338,143 @@ if __name__ == '__main__':
     s.multiply_coefficient_and_row(-1, 2)
     if not (s[0] == p1 and
             s[1] == p0 and
-            s[2] == Plane(Vector(['-1', '-1', '1']), '-3') and
+            s[2] == Hyperplane(normal_vector=Vector(['-1', '-1', '1']), constant_term='-3') and
             s[3] == p3):
         print('test case 5 failed')
 
     s.multiply_coefficient_and_row(10, 1)
     if not (s[0] == p1 and
-            s[1] == Plane(Vector(['10', '10', '10']), '10') and
-            s[2] == Plane(Vector(['-1', '-1', '1']), '-3') and
+            s[1] == Hyperplane(normal_vector=Vector(['10', '10', '10']), constant_term='10') and
+            s[2] == Hyperplane(normal_vector=Vector(['-1', '-1', '1']), constant_term='-3') and
             s[3] == p3):
         print('test case 6 failed')
 
     s.add_multiple_times_row_to_row(0, 0, 1)
     if not (s[0] == p1 and
-            s[1] == Plane(Vector(['10', '10', '10']), '10') and
-            s[2] == Plane(Vector(['-1', '-1', '1']), '-3') and
+            s[1] == Hyperplane(normal_vector=Vector(['10', '10', '10']), constant_term='10') and
+            s[2] == Hyperplane(normal_vector=Vector(['-1', '-1', '1']), constant_term='-3') and
             s[3] == p3):
         print('test case 7 failed')
 
     s.add_multiple_times_row_to_row(1, 0, 1)
     if not (s[0] == p1 and
-            s[1] == Plane(Vector(['10', '11', '10']), '12') and
-            s[2] == Plane(Vector(['-1', '-1', '1']), '-3') and
+            s[1] == Hyperplane(normal_vector=Vector(['10', '11', '10']), constant_term='12') and
+            s[2] == Hyperplane(normal_vector=Vector(['-1', '-1', '1']), constant_term='-3') and
             s[3] == p3):
         print('test case 8 failed')
 
     s.add_multiple_times_row_to_row(-1, 1, 0)
-    if not (s[0] == Plane(Vector(['-10', '-10', '-10']), '-10') and
-            s[1] == Plane(Vector(['10', '11', '10']), '12') and
-            s[2] == Plane(Vector(['-1', '-1', '1']), '-3') and
+    if not (s[0] == Hyperplane(normal_vector=Vector(['-10', '-10', '-10']), constant_term='-10') and
+            s[1] == Hyperplane(normal_vector=Vector(['10', '11', '10']), constant_term='12') and
+            s[2] == Hyperplane(normal_vector=Vector(['-1', '-1', '1']), constant_term='-3') and
             s[3] == p3):
         print('test case 9 failed')
 
     print('############################')
     print('Quiz: Coding Triangular Form')
 
-    p1 = Plane(Vector(['1', '1', '1']), '1')
-    p2 = Plane(Vector(['0', '1', '1']), '2')
+    p1 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['0', '1', '1']), constant_term='2')
     s = LinearSystem([p1, p2])
     t = s.compute_triangular_form()
     if not (t[0] == p1 and
             t[1] == p2):
         print('test case 1 failed')
 
-    p1 = Plane(Vector(['1', '1', '1']), '1')
-    p2 = Plane(Vector(['1', '1', '1']), '2')
+    p1 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='2')
     s = LinearSystem([p1, p2])
     t = s.compute_triangular_form()
     if not (t[0] == p1 and
-            t[1] == Plane(constant_term='1')):
+            t[1] == Hyperplane(dimension=p1.dimension, constant_term='1')):
         print('test case 2 failed')
 
-    p1 = Plane(Vector(['1', '1', '1']), '1')
-    p2 = Plane(Vector(['0', '1', '0']), '2')
-    p3 = Plane(Vector(['1', '1', '-1']), '3')
-    p4 = Plane(Vector(['1', '0', '-2']), '2')
+    p1 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['0', '1', '0']), constant_term='2')
+    p3 = Hyperplane(normal_vector=Vector(['1', '1', '-1']), constant_term='3')
+    p4 = Hyperplane(normal_vector=Vector(['1', '0', '-2']), constant_term='2')
     s = LinearSystem([p1, p2, p3, p4])
     t = s.compute_triangular_form()
     if not (t[0] == p1 and
             t[1] == p2 and
-            t[2] == Plane(Vector(['0', '0', '-2']), '2') and
-            t[3] == Plane()):
+            t[2] == Hyperplane(normal_vector=Vector(['0', '0', '-2']), constant_term='2') and
+            t[3] == Hyperplane(dimension=p1.dimension)):
         print('test case 3 failed')
 
-    p1 = Plane(Vector(['0', '1', '1']), '1')
-    p2 = Plane(Vector(['1', '-1', '1']), '2')
-    p3 = Plane(Vector(['1', '2', '-5']), '3')
+    p1 = Hyperplane(normal_vector=Vector(['0', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['1', '-1', '1']), constant_term='2')
+    p3 = Hyperplane(normal_vector=Vector(['1', '2', '-5']), constant_term='3')
     s = LinearSystem([p1, p2, p3])
     t = s.compute_triangular_form()
-    if not (t[0] == Plane(Vector(['1', '-1', '1']), '2') and
-            t[1] == Plane(Vector(['0', '1', '1']), '1') and
-            t[2] == Plane(Vector(['0', '0', '-9']), '-2')):
+    if not (t[0] == Hyperplane(normal_vector=Vector(['1', '-1', '1']), constant_term='2') and
+            t[1] == Hyperplane(normal_vector=Vector(['0', '1', '1']), constant_term='1') and
+            t[2] == Hyperplane(normal_vector=Vector(['0', '0', '-9']), constant_term='-2')):
         print('test case 4 failed')
 
     print('#################')
     print('Quiz: Coding RREF')
 
-    p1 = Plane(Vector(['1', '1', '1']), '1')
-    p2 = Plane(Vector(['0', '1', '1']), '2')
+    p1 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['0', '1', '1']), constant_term='2')
     s = LinearSystem([p1, p2])
     r = s.compute_rref()
-    if not (r[0] == Plane(Vector(['1', '0', '0']), '-1') and
+    if not (r[0] == Hyperplane(normal_vector=Vector(['1', '0', '0']), constant_term='-1') and
             r[1] == p2):
         print('test case 1 failed')
 
-    p1 = Plane(Vector(['1', '1', '1']), '1')
-    p2 = Plane(Vector(['1', '1', '1']), '2')
+    p1 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='2')
     s = LinearSystem([p1, p2])
     r = s.compute_rref()
     if not (r[0] == p1 and
-            r[1] == Plane(constant_term='1')):
+            r[1] == Hyperplane(dimension=p1.dimension, constant_term='1')):
         print('test case 2 failed')
 
-    p1 = Plane(Vector(['1', '1', '1']), '1')
-    p2 = Plane(Vector(['0', '1', '0']), '2')
-    p3 = Plane(Vector(['1', '1', '-1']), '3')
-    p4 = Plane(Vector(['1', '0', '-2']), '2')
+    p1 = Hyperplane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['0', '1', '0']), constant_term='2')
+    p3 = Hyperplane(normal_vector=Vector(['1', '1', '-1']), constant_term='3')
+    p4 = Hyperplane(normal_vector=Vector(['1', '0', '-2']), constant_term='2')
     s = LinearSystem([p1, p2, p3, p4])
     r = s.compute_rref()
-    if not (r[0] == Plane(Vector(['1', '0', '0']), '0') and
+    if not (r[0] == Hyperplane(normal_vector=Vector(['1', '0', '0']), constant_term='0') and
             r[1] == p2 and
-            r[2] == Plane(Vector(['0', '0', '-2']), '2') and
-            r[3] == Plane()):
+            r[2] == Hyperplane(normal_vector=Vector(['0', '0', '-2']), constant_term='2') and
+            r[3] == Hyperplane(dimension=p1.dimension)):
         print('test case 3 failed')
 
-    p1 = Plane(Vector(['0', '1', '1']), '1')
-    p2 = Plane(Vector(['1', '-1', '1']), '2')
-    p3 = Plane(Vector(['1', '2', '-5']), '3')
+    p1 = Hyperplane(normal_vector=Vector(['0', '1', '1']), constant_term='1')
+    p2 = Hyperplane(normal_vector=Vector(['1', '-1', '1']), constant_term='2')
+    p3 = Hyperplane(normal_vector=Vector(['1', '2', '-5']), constant_term='3')
     s = LinearSystem([p1, p2, p3])
     r = s.compute_rref()
-    if not (r[0] == Plane(Vector(['1', '0', '0']),
-            Decimal('23') / Decimal('9')) and
-            r[1] == Plane(Vector(['0', '1', '0']),
-            Decimal('7') / Decimal('9')) and
-            r[2] == Plane(Vector(['0', '0', '1']),
-            Decimal('2') / Decimal('9'))):
+    if not (r[0] == Hyperplane(normal_vector=Vector(['1', '0', '0']),
+                               constant_term=Decimal('23') / Decimal('9')) and
+            r[1] == Hyperplane(normal_vector=Vector(['0', '1', '0']),
+                               constant_term=Decimal('7') / Decimal('9')) and
+            r[2] == Hyperplane(normal_vector=Vector(['0', '0', '1']),
+                               constant_term=Decimal('2') / Decimal('9'))):
         print('test case 4 failed')
 
     print('########################')
     print('Quiz: Coding GE Solution')
 
-    p1 = Plane(Vector([5.862, 1.178, -10.366]), -8.15)
-    p2 = Plane(Vector([-2.931, -0.589, 5.183]), -4.075)
+    p1 = Hyperplane(normal_vector=Vector([5.862, 1.178, -10.366]), constant_term=-8.15)
+    p2 = Hyperplane(normal_vector=Vector([-2.931, -0.589, 5.183]), constant_term=-4.075)
     s = LinearSystem([p1, p2])
     solution = s.compute_solution()
     print(solution)
 
-    p1 = Plane(Vector([8.631, 5.112, -1.816]), -5.113)
-    p2 = Plane(Vector([4.315, 11.132, -5.27]), -6.775)
-    p3 = Plane(Vector([-2.158, 3.01, -1.727]), -0.831)
+    p1 = Hyperplane(normal_vector=Vector([8.631, 5.112, -1.816]), constant_term=-5.113)
+    p2 = Hyperplane(normal_vector=Vector([4.315, 11.132, -5.27]), constant_term=-6.775)
+    p3 = Hyperplane(normal_vector=Vector([-2.158, 3.01, -1.727]), constant_term=-0.831)
     s = LinearSystem([p1, p2, p3])
     solution = s.compute_solution()
     print(solution)
 
-    p1 = Plane(Vector([5.262, 2.739, -9.878]), -3.441)
-    p2 = Plane(Vector([5.111, 6.358, 7.638]), -2.152)
-    p3 = Plane(Vector([2.016, -9.924, -1.367]), -9.278)
-    p4 = Plane(Vector([2.167, -13.543, -18.883]), -10.567)
+    p1 = Hyperplane(normal_vector=Vector([5.262, 2.739, -9.878]), constant_term=-3.441)
+    p2 = Hyperplane(normal_vector=Vector([5.111, 6.358, 7.638]), constant_term=-2.152)
+    p3 = Hyperplane(normal_vector=Vector([2.016, -9.924, -1.367]), constant_term=-9.278)
+    p4 = Hyperplane(normal_vector=Vector([2.167, -13.543, -18.883]), constant_term=-10.567)
     s = LinearSystem([p1, p2, p3, p4])
     solution = s.compute_solution()
     print(solution)
@@ -482,20 +482,20 @@ if __name__ == '__main__':
     print('############################')
     print('Quiz: Coding Parametrization')
 
-    p1 = Plane(Vector([0.786, 0.786, 0.588]), -0.714)
-    p2 = Plane(Vector([-0.131, -0.131, 0.244]), 0.319)
+    p1 = Hyperplane(normal_vector=Vector([0.786, 0.786, 0.588]), constant_term=-0.714)
+    p2 = Hyperplane(normal_vector=Vector([-0.131, -0.131, 0.244]), constant_term=.319)
     s = LinearSystem([p1, p2])
     print('System 1 solution: \n{0}'.format(s.compute_solution()))
 
-    p1 = Plane(Vector([8.631, 5.112, -1.816]), -5.113)
-    p2 = Plane(Vector([4.315, 11.132, -5.27]), -6.775)
-    p3 = Plane(Vector([-2.158, 3.01, -1.727]), -0.831)
+    p1 = Hyperplane(normal_vector=Vector([8.631, 5.112, -1.816]), constant_term=-5.113)
+    p2 = Hyperplane(normal_vector=Vector([4.315, 11.132, -5.27]), constant_term=-6.775)
+    p3 = Hyperplane(normal_vector=Vector([-2.158, 3.01, -1.727]), constant_term=-0.831)
     s = LinearSystem([p1, p2, p3])
     print('System 2 solution: \n{0}'.format(s.compute_solution()))
 
-    p1 = Plane(Vector([0.935, 1.76, -9.365]), -9.955)
-    p2 = Plane(Vector([0.187, 0.352, -1.873]), -1.991)
-    p3 = Plane(Vector([0.374, 0.704, -3.746]), -3.982)
-    p4 = Plane(Vector([-0.561, -1.056, 5.619]), 5.973)
+    p1 = Hyperplane(normal_vector=Vector([0.935, 1.76, -9.365]), constant_term=-9.955)
+    p2 = Hyperplane(normal_vector=Vector([0.187, 0.352, -1.873]), constant_term=-1.991)
+    p3 = Hyperplane(normal_vector=Vector([0.374, 0.704, -3.746]), constant_term=-3.982)
+    p4 = Hyperplane(normal_vector=Vector([-0.561, -1.056, 5.619]), constant_term=5.973)
     s = LinearSystem([p1, p2, p3, p4])
     print('System 3 solution: \n{0}'.format(s.compute_solution()))
